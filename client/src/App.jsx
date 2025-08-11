@@ -13,6 +13,7 @@ import MyCourses from './pages/educator/MyCourses';
 import StudentsEnrolled from './pages/educator/StudentsEnrolled';
 import Navbar from './componenets/student/Navbar';
 
+
 const App =() =>{
 
   const isEducatorRoute = useMatch('/educator/*')
@@ -29,7 +30,7 @@ const App =() =>{
         <Route path='/watchcourses/:courseId' element={<WatchCourses/>} />
         <Route path='/loading/:path' element={<Loading/>} />
         <Route path='/educator' element={<Educator/>}>
-           <Route path='educator' element={<DashBoard/>}/>
+           <Route path='/educator' element={<DashBoard/>}/>
            <Route path='add-course' element={<AddCourse/>}/>  
            <Route path='my-courses' element={<MyCourses/>}/>
            <Route path='student-enrolled'element={<StudentsEnrolled/>}/>

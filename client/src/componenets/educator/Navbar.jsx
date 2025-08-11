@@ -17,7 +17,7 @@ const Navbar = () => {
       </Link>
       <div className='flex items-center gap-3'>
         <p>Hi!{user ? user.fullName: 'Developers'}</p>
-        {user ? <UserButton/> : <img classname='w-8 h-8 rounded-full object-cover' src={assets.profile_img}/>}
+        {user ? <UserButton/> : <img className='w-8 h-8 rounded-full object-cover' src={assets.profile_img}/>}
       </div>
     </div>
   )
