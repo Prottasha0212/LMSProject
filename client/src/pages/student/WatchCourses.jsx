@@ -5,6 +5,7 @@ import {assets} from '../../assets/assets'
 import humanizeDuration from 'humanize-duration'
 import YouTube from 'react-youtube'
 import Footer from '../../componenets/student/Footer'
+import Rating from '../../componenets/student/Rating'
 
 const WatchCourses = () => {
 
@@ -81,7 +82,8 @@ const WatchCourses = () => {
 
         </div>
         <div className='flex items-center gap-2 py-3 mt-10'>
-          <h1 classname='text-xl font-bold'>Rate this Course:</h1>
+          <h1 className='text-xl font-bold'>Rate this Course:</h1>
+          <Rating initialRating={0}/>
         </div>
 
       </div>
