@@ -1,81 +1,112 @@
-
-
-import React, { createContext, useState, useEffect, use } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import { dummyCourses } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import humanizeDuration from "humanize-duration";
+import { useAuth, useUser } from "@clerk/clerk-react";
 
 export const AppContext = createContext(null);
 
-export const AppContextProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-
-  const currency = import.meta.env.VITE_CURRENCY
+export const AppContextProvider = (props) => {
+  const currency = import.meta.env.VITE_CURRENCY;
   const navigate = useNavigate();
 
-  const [allCourses,setAllCourses]=useState([]);
-  const [isEducator,setIsEducator]=useState(true);
-  const [enrolledCourses,setEnrolledCourses] = useState([])
+  const { getToken } = useAuth();
+  const { user } = useUser();
 
-  //fetch all courses from the server
+  const [allCourses, setAllCourses] = useState([]);
+  const [isEducator, setIsEducator] = useState(true);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [token, setToken] = useState(null);
+
+  // 🔹 Fetch all courses (for now using dummy data)
   const fetchAllCourses = async () => {
     setAllCourses(dummyCourses);
-  }
-// function to calculate avg rating of crs
+  };
+
+  // 🔹 Function to calculate avg rating of a course
   const calculateRating = (course) => {
-    if (course.courseRatings.length === 0){
-      return 0;
-    }
-    let totalRating=0
-    course.courseRatings.forEach((rating) => {
-      totalRating += rating.rating;
-    });
-    return (totalRating / course.courseRatings.length);
+    if (!course.courseRatings || course.courseRatings.length === 0) return 0;
+    let totalRating = course.courseRatings.reduce((sum, r) => sum + r.rating, 0);
+    return totalRating / course.courseRatings.length;
   };
 
-  //function calculate course chapter time
+  // 🔹 Function to calculate chapter duration
   const calculateChapterTime = (chapter) => {
-    let time=0
-    chapter.chapterContent.map((lecture) => time += lecture.lectureDuration)
-    return humanizeDuration(time * 60 * 1000, { units: ["h","m"]});
-    
-  };
-
-  //function to calc course duration
-  const calculateCourseDuration = (course) => {
     let time = 0;
-    course.courseContent.map((chapter)=> chapter.chapterContent.map(
-      (lecture)=>time += lecture.lectureDuration));
+    chapter.chapterContent.forEach((lecture) => (time += lecture.lectureDuration));
     return humanizeDuration(time * 60 * 1000, { units: ["h", "m"] });
   };
 
-  //function calc to no of lectures in the course
-  const calculateNoOfLectures =(course)=>{
+  // 🔹 Function to calculate total course duration
+  const calculateCourseDuration = (course) => {
+    let time = 0;
+    course.courseContent.forEach((chapter) =>
+      chapter.chapterContent.forEach((lecture) => (time += lecture.lectureDuration))
+    );
+    return humanizeDuration(time * 60 * 1000, { units: ["h", "m"] });
+  };
+
+  // 🔹 Function to calculate no. of lectures
+  const calculateNoOfLectures = (course) => {
     let totalLectures = 0;
-    course.courseContent.forEach(chapter=>{
-      if(Array.isArray(chapter.chapterContent)){
+    course.courseContent.forEach((chapter) => {
+      if (Array.isArray(chapter.chapterContent)) {
         totalLectures += chapter.chapterContent.length;
       }
     });
     return totalLectures;
-  }
-  //fetch enrolled crses
-  const fetchUserEnrolledCourses=async ()=>{
-    setEnrolledCourses(dummyCourses)
-  }
+  };
 
+  // 🔹 Fetch enrolled courses (dummy for now)
+  const fetchUserEnrolledCourses = async () => {
+    setEnrolledCourses(dummyCourses);
+  };
 
-  // useEffect to fetch all courses on component mount
-useEffect(() =>{
-  fetchAllCourses();
-},[]);
+  // 🔹 Store Clerk Token when user logs in
+  useEffect(() => {
+    const fetchToken = async () => {
+      if (user) {
+        const t = await getToken();
+        console.log("🔑 Clerk Token:", t);
+        setToken(t);
+      }
+    };
+    fetchToken();
+  }, [user, getToken]);
+
+  // 🔹 Example: Call backend API securely with Clerk token
+  const publishCourse = async () => {
+    if (!token) return;
+
+    try {
+      const res = await fetch("http://localhost:5000/api/educator/publish", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ Clerk token sent here
+        },
+        body: JSON.stringify({ courseName: "New Course" }),
+      });
+
+      const data = await res.json();
+      console.log("📡 Publish API response:", data);
+      return data;
+    } catch (err) {
+      console.error("❌ Error publishing course:", err);
+    }
+  };
+
+  // 🔹 Fetch courses on mount
+  useEffect(() => {
+    fetchAllCourses();
+  }, []);
 
   const value = {
     user,
-    setUser,
+    token,
     currency,
-    allCourses,
     navigate,
+    allCourses,
     calculateRating,
     isEducator,
     setIsEducator,
@@ -84,12 +115,8 @@ useEffect(() =>{
     calculateNoOfLectures,
     enrolledCourses,
     fetchUserEnrolledCourses,
-
+    publishCourse, // ✅ available to call anywhere in app
   };
 
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
 };
