@@ -2,6 +2,7 @@ import  User  from "../models/User.js";
 import Stripe from "stripe";
 import { Purchase } from "../models/Purchase.js";
 import Course from "../models/Course.js";
+import {CourseProgress} from "../models/CourseProgress.js";
 
 // Get user data
 export const getUserData =async (req, res) => {
@@ -53,7 +54,7 @@ export const purchaseCourse = async (req, res) => {
         const purchaseData = {
             courseId:courseData._id,
             userId,
-            amount: (courseData.coursePrice - courseData.discount * courseData . coursePrice/ 100).toFixed(2),
+            amount: (courseData.coursePrice - (courseData.discount * courseData.coursePrice / 100)).toFixed(2),
 
         }
 
@@ -71,7 +72,7 @@ export const purchaseCourse = async (req, res) => {
                 product_data:{
                     name:courseData.courseTitle
                 },
-                unit_amount: Math.floor( newPurchase.amount) * 100
+                unit_amount: Math.floor(Number(newPurchase.amount) * 100)
             },
             quantity:1
         }]
@@ -156,7 +157,7 @@ export const addUserRating = async (req,res)=>{
             return res.json({success: false, message: "Course not found"});
         }
 
-        const user = await User.fingById(userId);
+        const user = await User.findById(userId);
 
         if(!user || !user.enrolledCourses.includes(courseId)){
             return res.json({success: false, message: "User has not enrolled in this course."});
