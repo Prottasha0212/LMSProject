@@ -8,6 +8,8 @@ import { assets } from '../../assets/assets';
 import humanizeDuration from "humanize-duration";
 import Footer from '../../componenets/student/Footer';
 import YouTube from 'react-youtube'
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
  const CourseDetails = () => {
 
@@ -18,17 +20,83 @@ import YouTube from 'react-youtube'
   const [isAlreadyEnrolled,setisAlreadyEnrolled] = useState(false);
   const [watchCoursesData,setWatchCoursesData] = useState(null);
 
-  const {allCourses,calculateRating,calculateChapterTime,calculateCourseDuration,calculateNoOfLectures,currency } = useContext(AppContext);
+  const {allCourses,calculateRating,calculateChapterTime,calculateCourseDuration,calculateNoOfLectures,currency,
+    backendUrl,userData,getToken} = useContext(AppContext);
 
   const fetchCourseData = async()=>{
-    const findCourses= allCourses.find(course => course._id === id)
-    setCourseData(findCourses);
+    try{
+      const {data} =await axios.get(backendUrl + '/api/course/' + id)
+
+      if(data.success){
+        setCourseData(data.courseData)
+      }else{
+        toast.error(data.message)
+      }
+    }catch(error){
+      toast.error(error.message)
+
+    }
   }
+
+  const enrollCourse = async () => {
+  try {
+    if (!userData) {
+      return toast.warn("Login to Enroll");
+    }
+    if (isAlreadyEnrolled) {
+      return toast.warn("Already Enrolled");
+    }
+
+    if (!courseData || !courseData._id) {
+      return toast.error("Course data not loaded yet!");
+    }
+
+    // Get Clerk token
+    const token = await getToken();
+
+    console.log("Sending purchase request:", {
+      courseId: courseData._id,
+      token: token ? "✅ present" : "❌ missing"
+    });
+    
+
+    // Don’t send userId – backend gets it from Clerk
+    const { data } = await axios.post(
+      backendUrl + "/api/user/purchase",
+      { courseId: courseData._id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (data.success) {
+      const { session_url } = data;
+      window.location.replace(session_url);
+    } else {
+      toast.error(data.message);
+      console.log(data.message);
+    }
+  } catch (error) {
+    toast.error(error.message);
+    console.log(error.message);
+  }
+};
+
 
   useEffect(()=>{
     fetchCourseData();
 
-  },[allCourses])
+  },[])
+
+  useEffect(()=>{
+    if(userData && courseData){
+      setisAlreadyEnrolled(userData.enrolledCourses.includes(courseData._id))
+    }
+  },[userData,courseData])
+
 
 const toggleSection  =(index)=>{
   setOpenSections((prev)=>(
@@ -68,7 +136,7 @@ const toggleSection  =(index)=>{
             <p>{courseData.enrolledStudents.length}{courseData.enrolledStudents.length > 1 ? 'students' : 'student'}</p>
         </div>
 
-        <p className='text-sm'>Course by <span className='text-blue-600 underline'>MStack</span></p>
+        <p className='text-sm'>Course by <span className='text-blue-600 underline'>{courseData.educator.name}</span></p>
 
         <div className='pt-8 text-gray-800'>
           <h2 className='text-xl font-semibold'>Course Structure</h2>
@@ -91,7 +159,7 @@ const toggleSection  =(index)=>{
                         <div className='flex items-center justify-between w-full text-gray-800 text-xs md:text-default'>
                           <p>{lecture.lectureTitle}</p>
                           <div className='flex gap-2'>
-                            {lecture.isPreviewFree && <p onClick={()=> setWatchCoursesrData({videoId:lecture.lectureUrl.split('/').pop()})}
+                            {lecture.isPreviewFree && <p onClick={()=> setWatchCoursesData({videoId:lecture.lectureUrl.split('/').pop()})}
                             className='text-blue-500 cursor-pointer'>Preview</p>}
                             <p>{humanizeDuration(lecture.lectureDuration * 60 * 1000, {units:['h','m']})}</p>
                           </div>
@@ -127,7 +195,7 @@ const toggleSection  =(index)=>{
 
           {
             watchCoursesData ? 
-                  <YouTube videoId={watchCoursesData.videoId} opts={{watchCoursesrVars:{autoplay: 1 }}} iframeClassName ='w-full aspect-video'/>
+                  <YouTube videoId={watchCoursesData.videoId} opts={{watchCoursesVars:{autoplay: 1 }}} iframeClassName ='w-full aspect-video'/>
                 : <img src={courseData.courseThumbnail} alt=""/>
           }
           <div className='p-5'>
@@ -169,7 +237,7 @@ const toggleSection  =(index)=>{
 
             </div>
 
-            <button className='md:mt-6 mt-4 w-full py-3 rounded bg-blue-600
+            <button onClick={enrollCourse} disabled={!courseData || !courseData._id} className='md:mt-6 mt-4 w-full py-3 rounded bg-blue-600
             text-white font-medium' >
               {isAlreadyEnrolled ? 'Already Enrolled' : 'Enroll Now'}</button>
 

@@ -1,9 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import uniqid from 'uniqid';
 import Quill from 'quill';
 import { assets } from '../../assets/assets';
+import { AppContext } from '../../context/AppContext';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const AddCouse = () => {
+
+  const {backendUrl,getToken} =useContext(AppContext)
 
   const quillRef = useRef(null);
   const editorRef = useRef(null);
@@ -77,6 +82,7 @@ const AddCouse = () => {
         if (chapter.chapterId === currentChapterId) {
           const newLecture = {
             ...lectureDetails,
+            lectureId:uniqid(),
             lectureOrder:chapter.chapterContent.length > 0 ? chapter.chapterContent.slice(-1)[0].
             lectureOrder + 1 : 1,  
           };
@@ -95,7 +101,46 @@ const AddCouse = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    try{
+      e.preventDefault()
+      if(!image){
+        toast.error('Thumbnail Not Selected')
+      }
+
+      const courseData = {
+        courseTitle,
+        courseDescription: quillRef.current.root.innerHTML,
+        coursePrice: Number(coursePrice),
+        discount: Number(discount),
+        courseContent:chapters,
+        
+      }
+      const formData = new FormData()
+      formData.append('courseData',JSON.stringify(courseData))
+      formData.append('image',image)
+
+      const token = await getToken()
+      const {data} = await axios.post(backendUrl + '/api/educator/add-course',formData,
+        {headers:{Authorization:`Bearer ${token}`}}
+      )
+
+      if (data.success){
+        toast.success(data.message)
+        setCourseTitle('')
+        setCoursePrice(0)
+        setDiscount(0)
+        setImage(null)
+        setChapters([])
+        quillRef.current.root.innerHTML=""
+      }else{
+        toast.error(data.message)
+      }
+    }catch(error){
+      toast.error(error.message)
+
+
+    }
+    
   };
 
   useEffect(()=>{
@@ -210,7 +255,7 @@ const AddCouse = () => {
                     onChange={(e) => setLectureDetails({...lectureDetails,isPreviewFree: e.target.checked})}/>
 
                   </div>
-                  <button type='button' classname="w-full bg-blue-400 text-white px-4 py-2 rounded"
+                  <button type='button' className="w-full bg-blue-400 text-white px-4 py-2 rounded"
                   onClick={addLecture}>Add</button>
                   <img onClick={()=> setShowPopup(false)} src={assets.cross_icon} className='absolute top-4 right-4 cursor-pointer' alt=""/>
                   
