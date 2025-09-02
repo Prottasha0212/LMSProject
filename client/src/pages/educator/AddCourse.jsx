@@ -103,9 +103,18 @@ const AddCouse = () => {
   const handleSubmit = async (e) => {
     try{
       e.preventDefault()
-      if(!image){
-        toast.error('Thumbnail Not Selected')
+      if(!image) return toast.error('Thumbnail Not Selected')
+         if (!quillRef.current || !quillRef.current.root.innerHTML.trim())
+        return toast.error("Course description is required");
+
+      const totalLectures = chapters.reduce(
+        (count, chapter) => count + chapter.chapterContent.length,
+        0
+      );
+      if (totalLectures === 0) {
+        return toast.error("You need at least one lecture to publish a course");
       }
+    
 
       const courseData = {
         courseTitle,

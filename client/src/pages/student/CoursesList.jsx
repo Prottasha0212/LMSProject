@@ -23,7 +23,7 @@ const CoursesList = () => {
       input ? 
         setFilteredCourse(
           tempCourses.filter(
-            item=> item.courseTitle.toLowerCase().includes(input.toLowerCase()) 
+            (item)=> item.courseTitle.toLowerCase().includes(input.toLowerCase()) 
           )
         )
 

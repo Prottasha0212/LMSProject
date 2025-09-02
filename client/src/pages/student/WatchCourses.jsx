@@ -7,7 +7,9 @@ import YouTube from 'react-youtube'
 import Footer from '../../componenets/student/Footer'
 import Rating from '../../componenets/student/Rating'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import Loading from '../../componenets/student/Loading'
+import confetti from "canvas-confetti";
 
 const WatchCourses = () => {
 
@@ -108,6 +110,29 @@ const WatchCourses = () => {
   useEffect(()=>{
     getCourseProgress;
   },[])
+
+  // 🎉 Show confetti if course is completed
+  useEffect(() => {
+    if (courseData && progressData) {
+      const totalLectures = courseData.courseContent.reduce(
+        (acc, chapter) => acc + chapter.chapterContent.length,
+        0
+      );
+
+      const completedLectures = progressData.lectureCompleted.length;
+
+      if (totalLectures > 0 && completedLectures === totalLectures) {
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.6 },
+        });
+
+        toast.success("🎉 Congratulations! You finished the course. Keep learning!");
+      }
+    }
+  }, [courseData, progressData]);
+
 
   return courseData ? (
 <>
