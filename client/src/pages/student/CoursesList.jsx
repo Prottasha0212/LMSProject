@@ -48,7 +48,7 @@ const CoursesList = () => {
       mt-8 text-gray-600'>
         <p>{input}</p>
         <img src={assets.cross_icon} alt="" className='cursor-pointer' onClick={()=> 
-        navigate('/coursesList')}/>
+        navigate('/course-list')}/>
       </div>
 
       }

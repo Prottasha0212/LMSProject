@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Mail, Youtube } from "lucide-react"; // Ensure lucide-react is installed
+import { Mail, Youtube} from "lucide-react"; // Ensure lucide-react is installed
 import Footer from "../../componenets/student/Footer";
 import { AppContext } from "../../context/AppContext";
 
@@ -63,7 +63,7 @@ const ContactUs = () => {
           <div className="flex items-center gap-4 mb-4">
             <Mail className="text-blue-600" />
             <a
-              href="mailto:knowsy.online.education@gmail.com"
+              href="mailto:Dormy.online.education@gmail.com"
               className="text-blue-700 hover:underline"
             >
               Dormy.online.education@gmail.com
@@ -73,7 +73,7 @@ const ContactUs = () => {
           <div className="flex items-center gap-4 mb-12">
             <Youtube className="text-red-600" />
             <a
-              href="https://www.youtube.com/@Knowsy-2025"
+              href="https://www.youtube.com/@Dormy-2025"
               target="_blank"
               rel="noreferrer"
               className="text-blue-700 hover:underline"

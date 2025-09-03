@@ -14,7 +14,7 @@ const CourseDetails = () => {
   const [courseData, setCourseData] = useState(null);
   const [openSections, setOpenSections] = useState({});
   const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
-  const [playerData, setPlayerData] = useState(null);
+  const [watchCoursesData, setWatchCoursesData] = useState(null);
 
   const {
     calculateRating,
@@ -196,7 +196,7 @@ const CourseDetails = () => {
                               {lecture.isPreviewFree && (
                                 <p
                                   onClick={() =>
-                                    setPlayerData({
+                                    setWatchCoursesData({
                                       videoID: lecture.lectureUrl
                                         .split("/")
                                         .pop(),
@@ -237,11 +237,11 @@ const CourseDetails = () => {
 
         {/* Right column */}
         <div className="max-w-course-card z-10 shadow-custom-card rounded-t md:rounded-none overflow-hidden bg-white min-w-[300px] sm:min-w-[420px]">
-          {playerData ? (
+          {watchCoursesData ? (
             <YouTube
-              videoId={playerData.videoID}
+              videoId={watchCoursesData.videoID}
               opts={{
-                playerVars: {
+                watchCoursesVars: {
                   autoplay: 1,
                 },
               }}

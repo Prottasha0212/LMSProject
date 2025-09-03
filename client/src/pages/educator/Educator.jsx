@@ -1,23 +1,20 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom';
-import Navbar from '../../componenets/educator/Navbar';
-import Sidebar from '../../componenets/educator/Sidebar';
-import { assets } from '../../assets/assets';
-import Footer from '../../componenets/student/Footer';
+import React from "react";
+import Navbar from "../../componenets/educator/Navbar";
+import { Outlet } from "react-router-dom";
+import Sidebar from "../../componenets/educator/Sidebar";
+import Footer from "../../componenets/educator/Footer";
 
 const Educator = () => {
   return (
-    <div className='text-default min-h-screen bg-white'>
+    <div className="text-default min-h-screen bg-white">
       <Navbar />
-      <div className='flex'>
+      <div className="flex">
         <Sidebar />
-        <div className='flex-1'>
-        {<Outlet />}
-        </div>
+        <div className="flex-1">{<Outlet />}</div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default Educator
+export default Educator;

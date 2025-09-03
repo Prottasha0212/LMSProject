@@ -29,7 +29,7 @@ const App =() =>{
       {!isEducatorRoute && <Navbar/>}
       <Routes>
         <Route path='/' element={<Home/>} />
-        <Route path='/courseslist' element={<CoursesList/>} />
+        <Route path='/course-list' element={<CoursesList/>} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
